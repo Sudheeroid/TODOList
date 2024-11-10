@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+<!-- Primary Green Colors -->
+<color name="primary_green">#479B5F</color>
+<color name="dark_green">#2E7A43</color>
+<color name="light_green">#6ABF81</color>
+
+<!-- Supporting Colors -->
+<color name="background_white">#FFFFFF</color>
+<color name="surface_gray">#F5F5F5</color>
+<color name="text_dark">#212121</color>
+<color name="text_secondary">#757575</color>
+<color name="divider">#EEEEEE</color>
+<color name="white">#FFFFFF</color>
+</resources>
