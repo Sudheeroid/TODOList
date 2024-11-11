@@ -8,6 +8,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.*
@@ -24,6 +25,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.todolist.R
 import com.example.todolist.viewmodel.MainViewModel
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun MainScreen(
     viewModel: MainViewModel = hiltViewModel(),
@@ -57,10 +59,11 @@ fun MainScreen(
                             Text(
                                 text = "Search",
                                 color = Color.White
-                            ) },
+                            )
+                        },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 16.dp,vertical = 3.dp),
+                            .padding(horizontal = 16.dp, vertical = 3.dp),
                         shape = RoundedCornerShape(50),
 
                         leadingIcon = {
@@ -68,15 +71,15 @@ fun MainScreen(
                                 imageVector = Icons.Default.Search,
                                 contentDescription = "Search",
                                 tint = Color.White,
-                                )
+                            )
                         },
                         colors = TextFieldDefaults.outlinedTextFieldColors(
-                            focusedBorderColor  = Color.White,
-                            unfocusedBorderColor  = Color.Transparent,
+                            focusedBorderColor = Color.White,
+                            unfocusedBorderColor = Color.Transparent,
                             cursorColor = Color.White
                         ),
 
-                     textStyle = TextStyle(
+                        textStyle = TextStyle(
                             color = colorResource(R.color.white)
                         ),
                         singleLine = true
@@ -86,7 +89,7 @@ fun MainScreen(
         },
         floatingActionButton = {
             FloatingActionButton(onClick = onAddNewTodo) {
-                Icon(Icons.Default.Add, contentDescription = "Add Todo",tint = Color.Black)
+                Icon(Icons.Default.Add, contentDescription = "Add Todo", tint = Color.Black)
             }
         }
     ) { padding ->
@@ -102,6 +105,7 @@ fun MainScreen(
                         modifier = Modifier.align(Alignment.Center)
                     )
                 }
+
                 state.todos.isEmpty() -> {
                     Text(
                         text = "Press the + button to add a TODO item",
@@ -111,6 +115,7 @@ fun MainScreen(
                             .padding(16.dp)
                     )
                 }
+
                 else -> {
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
@@ -118,7 +123,64 @@ fun MainScreen(
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         items(state.todos) { todo ->
-                            Card(
+                            val dismissState = rememberDismissState()
+
+                            SwipeToDismiss(
+                                state = dismissState,
+                                background = {
+                                    val color = colorResource(id = R.color.dark_green)
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .background(color)
+                                            .padding(16.dp),
+                                        contentAlignment = Alignment.CenterEnd
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.Delete,
+                                            contentDescription = "Delete Todo",
+                                            tint = Color.White
+                                        )
+                                    }
+                                },
+                                dismissContent = {
+                                    Card(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        elevation = 1.dp,
+                                        backgroundColor = Color.White
+                                    ) {
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(16.dp),
+                                            horizontalArrangement = Arrangement.SpaceBetween,
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Text(
+                                                text = todo.text,
+                                                color = Color.Black,
+                                                modifier = Modifier.weight(1f)
+                                            )
+                                            IconButton(onClick = { viewModel.deleteTodo(todo) }) {
+                                                Icon(
+                                                    imageVector = Icons.Default.Delete,
+                                                    contentDescription = "Delete Todo",
+                                                    tint = colorResource(id = R.color.dark_green)
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            )
+
+                            LaunchedEffect(dismissState.isDismissed(DismissDirection.EndToStart)) {
+                                if (dismissState.isDismissed(DismissDirection.EndToStart)) {
+                                    viewModel.deleteTodo(todo) // Call delete method
+                                }
+                            }
+
+
+                            /* Card(
                                 modifier = Modifier.fillMaxWidth(),
                                 elevation = 1.dp,
                                 backgroundColor = Color.White
@@ -128,7 +190,10 @@ fun MainScreen(
                                     color = Color.Black,
                                     modifier = Modifier.padding(16.dp)
                                 )
-                            }
+                                IconButton(onClick = { viewModel.deleteTodo(todo) }) {
+                                    Icon(Icons.Default.Delete, contentDescription = "Delete Todo")
+                                }
+                            }*/
                         }
                     }
                 }
@@ -136,3 +201,4 @@ fun MainScreen(
         }
     }
 }
+

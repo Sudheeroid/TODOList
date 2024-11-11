@@ -6,7 +6,7 @@ import androidx.room.PrimaryKey
 @Entity(tableName = "todos")
 data class TodoItem(
     @PrimaryKey(autoGenerate = true)
-    val id: Int = 0,
+    val id: Long = 0,
     val text: String,
     val createdAt: Long = System.currentTimeMillis()
 )

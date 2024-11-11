@@ -1,5 +1,7 @@
 package com.example.todolist.viewmodel
 
+import android.widget.Toast
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.todolist.data.model.TodoItem
@@ -19,7 +21,6 @@ class MainViewModel @Inject constructor(
 
     private val _state = MutableStateFlow(MainScreenState())
     val state = _state.asStateFlow()
-
     init {
         observeTodos()
     }
@@ -57,6 +58,16 @@ class MainViewModel @Inject constructor(
 
     fun clearError() {
         _state.update { it.copy(error = null) }
+    }
+    fun deleteTodo(todo: TodoItem) {
+        viewModelScope.launch {
+            try {
+                repository.deleteTodo(todo)
+                _state.value = _state.value.copy(todos = _state.value.todos - todo)
+            } catch (e: Exception) {
+                _state.update { it.copy(error = e.message) }
+            }
+        }
     }
 }
 

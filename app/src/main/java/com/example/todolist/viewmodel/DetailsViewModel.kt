@@ -2,6 +2,7 @@ package com.example.todolist.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.todolist.data.model.TodoItem
 import com.example.todolist.data.repository.TodoRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
@@ -29,6 +30,17 @@ class DetailsViewModel @Inject constructor(
                     }
                 repository.addTodo(text)
                     _uiEvent.emit(UiEvent.Success)
+            } catch (e: Exception) {
+                _uiEvent.emit(UiEvent.Error(e.message ?: "Unknown error"))
+            }
+        }
+    }
+
+    fun deleteTodo(todo: TodoItem) {
+        viewModelScope.launch {
+            try {
+                repository.deleteTodo(todo)
+                _uiEvent.emit(UiEvent.Success) // Emit success event
             } catch (e: Exception) {
                 _uiEvent.emit(UiEvent.Error(e.message ?: "Unknown error"))
             }
