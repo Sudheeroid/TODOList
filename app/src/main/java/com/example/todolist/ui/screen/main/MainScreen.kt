@@ -105,6 +105,7 @@ fun MainScreen(
                 state.todos.isEmpty() -> {
                     Text(
                         text = "Press the + button to add a TODO item",
+                        color = Color.Black,
                         modifier = Modifier
                             .align(Alignment.Center)
                             .padding(16.dp)
