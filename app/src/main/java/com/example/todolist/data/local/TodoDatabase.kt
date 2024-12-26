@@ -3,7 +3,7 @@ package com.example.todolist.data.local
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
-import com.example.todolist.data.model.TodoItem
+import com.example.todolist.data.remote.model.TodoItem
 
 @Database(
     entities = [TodoItem::class],

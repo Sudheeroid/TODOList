@@ -1,7 +1,7 @@
 package com.example.todolist.data.repository
 
 import com.example.todolist.data.local.TodoDao
-import com.example.todolist.data.model.TodoItem
+import com.example.todolist.data.remote.model.TodoItem
 import javax.inject.Inject
 
 class TodoRepositoryImpl @Inject constructor() : ITodoRepository {

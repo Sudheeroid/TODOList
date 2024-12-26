@@ -1,4 +1,4 @@
-package com.example.todolist.data.model
+package com.example.todolist.data.remote.model
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
