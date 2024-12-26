@@ -1,7 +1,9 @@
 package com.example.todolist.ui.screen.details
 
 import android.widget.Toast
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -9,6 +11,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -44,64 +48,79 @@ fun DetailsScreen(
         }
     }
 
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
+            .background(colorResource(id = R.color.light_gray))
             .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-
+        contentAlignment = Alignment.Center
     ) {
-        Text(
-            modifier = Modifier.padding(bottom = 40.dp,top = 40.dp),
-            text = "Details Screen",
-            fontSize = 20.sp,
-            color = colorResource(id = R.color.dark_green)
-        )
-        OutlinedTextField(
-            value = text,
-            onValueChange = { text = it },
-            label = { Text("Enter Details") },
-            modifier = Modifier.fillMaxWidth(),
-            colors = TextFieldDefaults.outlinedTextFieldColors(
-                focusedBorderColor = colorResource(id = R.color.dark_green),
-                unfocusedBorderColor = colorResource(id = R.color.dark_green),
-                cursorColor = colorResource(id = R.color.dark_green)
-            ),
-            enabled = !isLoading
-        )
-
-        Button(
-            onClick = {
-                isLoading = true
-                viewModel.addTodo(text)
-            },
-            modifier = Modifier.fillMaxWidth() .padding(top = 40.dp),
-            enabled = text.isNotBlank() && !isLoading
+        Card(
+            elevation = 8.dp,
+            shape = RoundedCornerShape(16.dp),
+            modifier = Modifier.fillMaxWidth()
         ) {
-            if (isLoading) {
-                CircularProgressIndicator(
-                    color = colorResource(id = R.color.dark_green),
-                    modifier = Modifier.size(24.dp)
-                )
-            } else {
-                Text(
-                    text = "Add to TODO list",
-                    color = Color.White
-                )
-            }
-        }
-        if (isLoading) {
-            Box(
+            Column(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp),
-                contentAlignment = Alignment.Center
+                    .background(Color.White)
+                    .padding(24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                CircularProgressIndicator(
-                    color = colorResource(id = R.color.dark_green),
-                    modifier = Modifier.size(48.dp),
-                    strokeWidth = 4.dp
+                Text(
+                    text = "Details Screen",
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = colorResource(id = R.color.dark_green)
                 )
+
+                OutlinedTextField(
+                    value = text,
+                    onValueChange = { text = it },
+                    label = { Text("Enter Task Details") },
+                    placeholder = { Text("E.g., Buy groceries") },
+                    modifier = Modifier.fillMaxWidth(),
+                    textStyle = TextStyle(fontSize = 16.sp,color = Color.Black),
+
+                    colors = TextFieldDefaults.outlinedTextFieldColors(
+                        focusedBorderColor = colorResource(id = R.color.dark_green),
+                        unfocusedBorderColor = Color.Gray,
+                        cursorColor = colorResource(id = R.color.dark_green),
+                        backgroundColor = colorResource(id = R.color.light_gray)
+                    ),
+                    shape = RoundedCornerShape(12.dp),
+                    enabled = !isLoading,
+                    singleLine = true
+                )
+
+                Button(
+                    onClick = {
+                        isLoading = true
+                        viewModel.addTodo(text)
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(50.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        backgroundColor = colorResource(id = R.color.dark_green),
+                        contentColor = Color.White
+                    ),
+                    enabled = text.isNotBlank() && !isLoading,
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    if (isLoading) {
+                        CircularProgressIndicator(
+                            color = Color.White,
+                            modifier = Modifier.size(24.dp),
+                            strokeWidth = 2.dp
+                        )
+                    } else {
+                        Text(
+                            text = "Add to TODO List",
+                            style = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.Medium)
+                        )
+                    }
+                }
             }
         }
     }

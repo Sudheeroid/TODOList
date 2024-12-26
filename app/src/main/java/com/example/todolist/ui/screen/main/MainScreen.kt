@@ -31,12 +31,12 @@ fun MainScreen(
     viewModel: MainViewModel = hiltViewModel(),
     onAddNewTodo: () -> Unit
 ) {
-    val state by viewModel.state.collectAsState()
+    val uiState by viewModel.state.collectAsState()
     val searchQuery by viewModel.searchQuery.collectAsState()
     val scaffoldState = rememberScaffoldState()
 
-    LaunchedEffect(state.error) {
-        state.error?.let { error ->
+    LaunchedEffect(uiState.error) {
+        uiState.error?.let { error ->
             scaffoldState.snackbarHostState.showSnackbar(
                 message = error,
                 actionLabel = "Dismiss"
@@ -50,155 +50,139 @@ fun MainScreen(
         topBar = {
             TopAppBar(
                 backgroundColor = colorResource(R.color.primary_green),
-                title = { Text("Todo List") },
-                actions = {
-                    OutlinedTextField(
-                        value = searchQuery,
-                        onValueChange = viewModel::updateSearchQuery,
-                        placeholder = {
-                            Text(
-                                text = "Search",
-                                color = Color.White
-                            )
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 3.dp),
-                        shape = RoundedCornerShape(50),
-
-                        leadingIcon = {
-                            Icon(
-                                imageVector = Icons.Default.Search,
-                                contentDescription = "Search",
-                                tint = Color.White,
-                            )
-                        },
-                        colors = TextFieldDefaults.outlinedTextFieldColors(
-                            focusedBorderColor = Color.White,
-                            unfocusedBorderColor = Color.Transparent,
-                            cursorColor = Color.White
-                        ),
-
-                        textStyle = TextStyle(
-                            color = colorResource(R.color.white)
-                        ),
-                        singleLine = true
-                    )
-                }
+                title = { Text("Todo List", color = Color.White) }
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = onAddNewTodo) {
-                Icon(Icons.Default.Add, contentDescription = "Add Todo", tint = Color.Black)
+            FloatingActionButton(
+                onClick = onAddNewTodo,
+                backgroundColor = colorResource(id = R.color.primary_green),
+                contentColor = Color.White
+            ) {
+                Icon(Icons.Default.Add, contentDescription = "Add Todo")
             }
         }
     ) { padding ->
-        Box(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .background(Color.White)
+                .background(colorResource(id = R.color.light_gray))
         ) {
-            when {
-                state.isLoading -> {
-                    CircularProgressIndicator(
-                        modifier = Modifier.align(Alignment.Center)
+            // Add search bar
+            OutlinedTextField(
+                value = searchQuery,
+                onValueChange = viewModel::updateSearchQuery,
+                placeholder = {
+                    Text(
+                        text = "Search",
+                        color = Color.Gray
                     )
-                }
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Default.Search,
+                        contentDescription = "Search Icon"
+                    )
+                },
+                shape = RoundedCornerShape(50),
+                colors = TextFieldDefaults.outlinedTextFieldColors(
+                    focusedBorderColor = colorResource(R.color.primary_green),
+                    unfocusedBorderColor = Color.Gray,
+                    cursorColor = colorResource(R.color.primary_green)
+                ),
+                textStyle = TextStyle(color = Color.Black),
+                singleLine = true
+            )
 
-                state.todos.isEmpty() -> {
+            // Check if the filtered list is empty
+            val filteredTodos = uiState.todos.filter {
+                it.text.contains(searchQuery, ignoreCase = true)
+            }
+
+            if (filteredTodos.isEmpty()) {
+                // Show empty state message
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
                     Text(
                         text = "Press the + button to add a TODO item",
-                        color = Color.Black,
-                        modifier = Modifier
-                            .align(Alignment.Center)
-                            .padding(16.dp)
+                        color = Color.Gray,
+                        style = MaterialTheme.typography.body1
                     )
                 }
-
-                else -> {
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        items(state.todos) { todo ->
-                            val dismissState = rememberDismissState()
-
-                            SwipeToDismiss(
-                                state = dismissState,
-                                background = {
-                                    val color = colorResource(id = R.color.dark_green)
-                                    Box(
-                                        modifier = Modifier
-                                            .fillMaxSize()
-                                            .background(color)
-                                            .padding(16.dp),
-                                        contentAlignment = Alignment.CenterEnd
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Default.Delete,
-                                            contentDescription = "Delete Todo",
-                                            tint = Color.White
-                                        )
-                                    }
-                                },
-                                dismissContent = {
-                                    Card(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        elevation = 1.dp,
-                                        backgroundColor = Color.White
-                                    ) {
-                                        Row(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .padding(16.dp),
-                                            horizontalArrangement = Arrangement.SpaceBetween,
-                                            verticalAlignment = Alignment.CenterVertically
-                                        ) {
-                                            Text(
-                                                text = todo.text,
-                                                color = Color.Black,
-                                                modifier = Modifier.weight(1f)
-                                            )
-                                            IconButton(onClick = { viewModel.deleteTodo(todo) }) {
-                                                Icon(
-                                                    imageVector = Icons.Default.Delete,
-                                                    contentDescription = "Delete Todo",
-                                                    tint = colorResource(id = R.color.dark_green)
-                                                )
-                                            }
-                                        }
-                                    }
-                                }
-                            )
-
-                            LaunchedEffect(dismissState.isDismissed(DismissDirection.EndToStart)) {
-                                if (dismissState.isDismissed(DismissDirection.EndToStart)) {
-                                    viewModel.deleteTodo(todo) // Call delete method
+            } else {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(filteredTodos, key = { it.id }) { todo ->
+                        val dismissState = rememberDismissState(
+                            confirmStateChange = { dismissValue ->
+                                if (dismissValue == DismissValue.DismissedToStart) {
+                                    viewModel.deleteTodo(todo)
+                                    true
+                                } else {
+                                    false
                                 }
                             }
+                        )
 
-
-                            /* Card(
-                                modifier = Modifier.fillMaxWidth(),
-                                elevation = 1.dp,
-                                backgroundColor = Color.White
-                            ) {
-                                Text(
-                                    text = todo.text,
-                                    color = Color.Black,
-                                    modifier = Modifier.padding(16.dp)
-                                )
-                                IconButton(onClick = { viewModel.deleteTodo(todo) }) {
-                                    Icon(Icons.Default.Delete, contentDescription = "Delete Todo")
+                        SwipeToDismiss(
+                            state = dismissState,
+                            directions = setOf(DismissDirection.EndToStart),
+                            background = {
+                                val color = when (dismissState.dismissDirection) {
+                                    DismissDirection.EndToStart -> Color.Red
+                                    else -> Color.Transparent
                                 }
-                            }*/
-                        }
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .background(color)
+                                        .padding(horizontal = 20.dp),
+                                    contentAlignment = Alignment.CenterEnd
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Delete,
+                                        contentDescription = "Delete Icon",
+                                        tint = Color.White
+                                    )
+                                }
+                            },
+                            dismissContent = {
+                                Card(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    elevation = 2.dp,
+                                    backgroundColor = Color.White,
+                                    shape = RoundedCornerShape(8.dp)
+                                ) {
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(16.dp),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text(
+                                            text = todo.text,
+                                            color = Color.Black,
+                                            modifier = Modifier.weight(1f)
+                                        )
+                                    }
+                                }
+                            }
+                        )
                     }
                 }
             }
         }
     }
 }
+
 
