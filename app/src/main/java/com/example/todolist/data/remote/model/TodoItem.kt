@@ -10,3 +10,10 @@ data class TodoItem(
     val text: String,
     val createdAt: Long = System.currentTimeMillis()
 )
+
+@Entity(tableName = "products")
+data class Product(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val name: String,
+    val price: Double
+)
